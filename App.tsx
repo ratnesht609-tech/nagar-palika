@@ -1,15 +1,24 @@
+
+
 import React, { useState } from 'react';
 import { DraftSelector } from './components/DraftSelector';
 import { DraftForm } from './components/DraftForm';
+import { PrakashanTypeSelector } from './components/PrakashanTypeSelector';
+import { PrakashanForm } from './components/PrakashanForm';
+import { HouseTaxForm } from './components/HouseTaxForm';
+import { DemandNoticeForm } from './components/DemandNoticeForm';
 import { DraftPreview } from './components/DraftPreview';
 import { AIAnalyzer } from './components/AIAnalyzer';
+import { PromptDrafter } from './components/PromptDrafter';
 import { SplashScreen } from './components/SplashScreen';
 import { ExpertChat } from './components/ExpertChat';
-import { DraftType, FormData } from './types';
+import { DraftType, FormData, PrakashanNoticeBasis, PrakashanNoticeType } from './types';
 
 function App() {
-  const [step, setStep] = useState<'SPLASH' | 'SELECT' | 'AI' | 'CHAT' | 'FORM' | 'PREVIEW'>('SPLASH');
+  const [step, setStep] = useState<'SPLASH' | 'SELECT' | 'AI' | 'PROMPT_AI' | 'CHAT' | 'FORM' | 'PRAKASHAN_SELECT_TYPE' | 'PRAKASHAN_FORM' | 'HOUSE_TAX_FORM' | 'DEMAND_NOTICE_FORM' | 'PREVIEW'>('SPLASH');
   const [selectedType, setSelectedType] = useState<DraftType | null>(null);
+  const [prakashanType, setPrakashanType] = useState<PrakashanNoticeType | null>(null);
+  const [prakashanBasis, setPrakashanBasis] = useState<PrakashanNoticeBasis | null>(null);
   const [draftData, setDraftData] = useState<FormData | null>(null);
   const [aiInitialData, setAiInitialData] = useState<FormData | null>(null);
 
@@ -19,12 +28,31 @@ function App() {
 
   const handleSelectType = (type: DraftType) => {
     setSelectedType(type);
-    setAiInitialData(null); 
-    setStep('FORM');
+    setAiInitialData(null);
+    setDraftData(null); // Reset previous data
+    if (type === DraftType.PRAKASHAN) {
+      setStep('PRAKASHAN_SELECT_TYPE');
+    } else if (type === DraftType.HOUSE_TAX) {
+      setStep('HOUSE_TAX_FORM');
+    } else if (type === DraftType.DEMAND_NOTICE) {
+      setStep('DEMAND_NOTICE_FORM');
+    } else {
+      setStep('FORM');
+    }
+  };
+
+  const handlePrakashanTypeSelect = (type: PrakashanNoticeType, basis?: PrakashanNoticeBasis) => {
+    setPrakashanType(type);
+    setPrakashanBasis(basis || null);
+    setStep('PRAKASHAN_FORM');
   };
 
   const handleAIStart = () => {
     setStep('AI');
+  };
+  
+  const handlePromptStart = () => {
+    setStep('PROMPT_AI');
   };
   
   const handleChatStart = () => {
@@ -48,7 +76,25 @@ function App() {
   };
 
   const handleEdit = () => {
-    setStep('FORM');
+    if (selectedType === DraftType.PRAKASHAN) {
+      setStep('PRAKASHAN_FORM');
+    } else if (selectedType === DraftType.HOUSE_TAX) {
+      setStep('HOUSE_TAX_FORM');
+    } else if (selectedType === DraftType.DEMAND_NOTICE) {
+      setStep('DEMAND_NOTICE_FORM');
+    } else {
+      setStep('FORM');
+    }
+  };
+  
+  const handlePrakashanBack = () => {
+      if (prakashanBasis || prakashanType === 'assessment') {
+          // If we are on the form, go back to type selection
+          setStep('PRAKASHAN_SELECT_TYPE');
+      } else {
+          // If we are on type selection, go back to main menu
+          setStep('SELECT');
+      }
   };
 
   const handleReset = () => {
@@ -56,6 +102,8 @@ function App() {
     setSelectedType(null);
     setDraftData(null);
     setAiInitialData(null);
+    setPrakashanType(null);
+    setPrakashanBasis(null);
   };
 
   const handleUpdateDraft = (updatedData: FormData) => {
@@ -66,6 +114,8 @@ function App() {
     setStep('SELECT');
     setSelectedType(null);
     setAiInitialData(null);
+    setPrakashanType(null);
+    setPrakashanBasis(null);
   };
 
   return (
@@ -95,11 +145,19 @@ function App() {
               onSelect={handleSelectType} 
               onAIStart={handleAIStart}
               onChatStart={handleChatStart}
+              onPromptStart={handlePromptStart}
             />
           )}
 
           {step === 'AI' && (
             <AIAnalyzer 
+              onDraftGenerated={handleAIDraftGenerated}
+              onCancel={handleBackToSelect}
+            />
+          )}
+          
+          {step === 'PROMPT_AI' && (
+            <PromptDrafter 
               onDraftGenerated={handleAIDraftGenerated}
               onCancel={handleBackToSelect}
             />
@@ -115,6 +173,37 @@ function App() {
             <DraftForm 
               draftType={selectedType} 
               initialData={aiInitialData}
+              onSubmit={handleFormSubmit}
+              onBack={handleBackToSelect}
+            />
+          )}
+          
+          {step === 'PRAKASHAN_SELECT_TYPE' && (
+            <PrakashanTypeSelector
+              onSelect={handlePrakashanTypeSelect}
+              onBack={handleBackToSelect}
+            />
+          )}
+
+          {step === 'PRAKASHAN_FORM' && prakashanType && (
+            <PrakashanForm
+              noticeType={prakashanType}
+              noticeBasis={prakashanBasis}
+              initialData={draftData}
+              onSubmit={handleFormSubmit}
+              onBack={handlePrakashanBack}
+            />
+          )}
+
+          {step === 'HOUSE_TAX_FORM' && (
+            <HouseTaxForm
+              onSubmit={handleFormSubmit}
+              onBack={handleBackToSelect}
+            />
+          )}
+
+          {step === 'DEMAND_NOTICE_FORM' && (
+            <DemandNoticeForm
               onSubmit={handleFormSubmit}
               onBack={handleBackToSelect}
             />

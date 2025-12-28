@@ -1,10 +1,19 @@
+
+
 export enum DraftType {
   LETTER = 'LETTER', // पत्र
   ORDER = 'ORDER', // आदेश
   MEMO = 'MEMO', // कार्यालय ज्ञापन
   NOTE_SHEET = 'NOTE_SHEET', // नोटशीट
   PROPOSAL = 'PROPOSAL', // प्रस्ताव
+  PRAKASHAN = 'PRAKASHAN', // प्रकाशन सूचना
+  HOUSE_TAX = 'HOUSE_TAX', // गृहकर बिल
+  DEMAND_NOTICE = 'DEMAND_NOTICE', // मांग पत्र
 }
+
+export type PrakashanNoticeType = 'assessment' | 'mutation';
+export type PrakashanNoticeBasis = 'inheritance' | 'will';
+
 
 export interface SubjectTemplate {
   id: string;
@@ -49,6 +58,9 @@ export interface FormData {
   decisionType: string;
   
   copyTo: string[]; // प्रतिलिपि
+
+  // For House Tax Bill
+  billData?: any; 
 }
 
 export interface PhraseCategory {

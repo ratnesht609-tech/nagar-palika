@@ -1,9 +1,14 @@
+
+
 import { DraftType, SubjectTemplate } from '../types';
 
 export const DRAFT_TYPES = [
   { id: DraftType.LETTER, label: 'शासकीय पत्र', desc: 'Official Letter' },
   { id: DraftType.ORDER, label: 'कार्यालय आदेश', desc: 'Office Order' },
   { id: DraftType.MEMO, label: 'कार्यालय ज्ञापन', desc: 'Office Memorandum' },
+  { id: DraftType.PRAKASHAN, label: 'प्रकाशन सूचना', desc: 'Publication Notice'},
+  { id: DraftType.HOUSE_TAX, label: 'गृहकर बिल', desc: 'House Tax Bill' },
+  { id: DraftType.DEMAND_NOTICE, label: 'मांग पत्र', desc: 'Demand Notice' },
   { id: DraftType.NOTE_SHEET, label: 'नोटशीट', desc: 'Note Sheet' },
   { id: DraftType.PROPOSAL, label: 'प्रस्ताव', desc: 'Proposal' },
 ];
@@ -93,6 +98,21 @@ export const PHRASES = {
       { id: 'CMD_BY', text: 'आज्ञा से,' },
     ]
   },
+  [DraftType.PRAKASHAN]: {
+    openers: [],
+    closers: []
+  },
+  [DraftType.HOUSE_TAX]: {
+    openers: [],
+    closers: []
+  },
+  [DraftType.DEMAND_NOTICE]: {
+    openers: [
+        { id: 'REF_BASED', text: 'कृपया उपर्युक्त विषय एवं संदर्भित पत्र का अवलोकन करने का कष्ट करें। इस संबंध में लेख है कि' },
+        { id: 'GENERAL', text: 'उपर्युक्त विषय के संबंध में आपको सूचित किया जाता है कि' },
+    ],
+    closers: []
+  },
   [DraftType.NOTE_SHEET]: {
     openers: [
       { id: 'NOTE_PUTUP', text: 'प्रस्तुत प्रकरण ________ के संबंध में है।' },
@@ -122,7 +142,7 @@ export const COMMON_PHRASES = {
   decisions: [
     { id: 'DEC_APPROVE', text: 'अतः प्रकरण में सक्षम स्वीकृति प्रदान की जाती है।' },
     { id: 'DEC_REJECT', text: 'अतः प्रस्तुत प्रस्ताव को नियमानुसार न होने के कारण अमान्य किया जाता है।' },
-    { id: 'DEC_FWD', text: 'अतः आवश्यक कार्यवाही हेतु प्रेषित।' },
+    { id: 'DEC_FWD', text: 'आवश्यक कार्यवाही हेतु प्रेषित।' },
     { id: 'DEC_STRICT', text: 'भविष्य के लिए सचेत किया जाता है कि पुनरावृत्ति न हो।' },
   ],
   endings: [
