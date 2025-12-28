@@ -1,7 +1,7 @@
 
 
 import { GoogleGenAI, Type, Chat } from "@google/genai";
-import { DraftType, FormData } from "../types";
+import { DraftType, FormData, RTIAnalysisResult } from "../types";
 import { PrakashanData } from "../components/PrakashanForm";
 import { HouseTaxData } from "../components/HouseTaxForm";
 import { DemandNoticeData } from "../components/DemandNoticeForm";
@@ -26,6 +26,59 @@ export interface AnalysisResult {
     intent: string;
   }[];
 }
+
+// --- RTI EXPERT ANALYZER ---
+export const analyzeRTIQuery = async (queryText: string, fileData?: { base64: string, mimeType: string }): Promise<RTIAnalysisResult> => {
+    const model = "gemini-3-pro-preview";
+    const prompt = `
+        ROLE: You are a seasoned First Appellate Authority and expert Public Information Officer (PIO) under the RTI Act, 2005, advising a municipal officer in Uttar Pradesh.
+        MISSION: Your sole mission is to protect the officer by identifying all legally sound exemptions under the RTI Act, 2005, to deny or limit the information requested. You must be strategic and defensive.
+        INPUT: User has provided an RTI query, either as text or an uploaded document.
+        USER'S QUERY: "${queryText}"
+
+        INSTRUCTIONS:
+        1.  Analyze the provided RTI request (text and/or document).
+        2.  For EACH question/point in the request, determine the best legal response strategy.
+        3.  If a question can be legally denied, you MUST cite the **exact Section and sub-section** (e.g., Section 8(1)(j), Section 2(f)).
+        4.  Provide a **clear, concise explanation in professional Hindi** of *why* this exemption applies. For example: "यह जानकारी व्यक्तिगत है और इसका सार्वजनिक हित से कोई संबंध नहीं है" for 8(1)(j), or "आवेदक ने 'सूचना' नहीं मांगी है, बल्कि 'क्यों' और 'कैसे' जैसे प्रश्न पूछकर कार्यालय से राय/स्पष्टीकरण मांगा है, जो सूचना की परिभाषा (धारा 2(f)) के अंतर्गत नहीं आता" for 2(f).
+        5.  For each point, provide a "suggested_response_text" which is a single, formal sentence in Hindi that the officer can directly use in their reply.
+        6.  If information must be provided, your recommendation should be "PROVIDE_LIMITED" and you must suggest how to provide the absolute minimum required by law.
+
+        OUTPUT a valid JSON object matching this exact schema:
+        {
+          "overall_summary": "A brief summary of the RTI request in Hindi.",
+          "analysis": [
+            {
+              "question": "The specific question from the RTI.",
+              "recommendation": "DENY" | "PROVIDE_LIMITED" | "PROVIDE_FULL",
+              "exemption_section": "The exact section, e.g., 'धारा 8(1)(j)' or 'धारा 2(f)'.",
+              "reasoning": "The detailed explanation in Hindi for the recommendation.",
+              "suggested_response_text": "A sample Hindi sentence for the official reply."
+            }
+          ]
+        }
+    `;
+    
+    const contents: any = [{ text: prompt }];
+    if (fileData) {
+        contents.unshift({ inlineData: { mimeType: fileData.mimeType, data: fileData.base64 } });
+    }
+
+    const response = await ai.models.generateContent({
+        model: model,
+        contents: { parts: contents },
+        config: {
+            responseMimeType: "application/json",
+            thinkingConfig: { thinkingBudget: 8000 }
+        }
+    });
+
+    if (response.text) {
+        return JSON.parse(response.text) as RTIAnalysisResult;
+    }
+    throw new Error("RTI Analysis failed.");
+};
+
 
 // --- Image/PDF Analysis ---
 

@@ -9,13 +9,14 @@ import { HouseTaxForm } from './components/HouseTaxForm';
 import { DemandNoticeForm } from './components/DemandNoticeForm';
 import { DraftPreview } from './components/DraftPreview';
 import { AIAnalyzer } from './components/AIAnalyzer';
+import { RTIExpert } from './components/RTIExpert';
 import { PromptDrafter } from './components/PromptDrafter';
 import { SplashScreen } from './components/SplashScreen';
 import { ExpertChat } from './components/ExpertChat';
 import { DraftType, FormData, PrakashanNoticeBasis, PrakashanNoticeType } from './types';
 
 function App() {
-  const [step, setStep] = useState<'SPLASH' | 'SELECT' | 'AI' | 'PROMPT_AI' | 'CHAT' | 'FORM' | 'PRAKASHAN_SELECT_TYPE' | 'PRAKASHAN_FORM' | 'HOUSE_TAX_FORM' | 'DEMAND_NOTICE_FORM' | 'PREVIEW'>('SPLASH');
+  const [step, setStep] = useState<'SPLASH' | 'SELECT' | 'AI' | 'PROMPT_AI' | 'CHAT' | 'RTI_EXPERT' | 'FORM' | 'PRAKASHAN_SELECT_TYPE' | 'PRAKASHAN_FORM' | 'HOUSE_TAX_FORM' | 'DEMAND_NOTICE_FORM' | 'PREVIEW'>('SPLASH');
   const [selectedType, setSelectedType] = useState<DraftType | null>(null);
   const [prakashanType, setPrakashanType] = useState<PrakashanNoticeType | null>(null);
   const [prakashanBasis, setPrakashanBasis] = useState<PrakashanNoticeBasis | null>(null);
@@ -57,6 +58,10 @@ function App() {
   
   const handleChatStart = () => {
     setStep('CHAT');
+  };
+
+  const handleRTIStart = () => {
+    setStep('RTI_EXPERT');
   };
 
   const handleAIDraftGenerated = (type: DraftType, data: FormData, directToPreview: boolean = false) => {
@@ -146,6 +151,7 @@ function App() {
               onAIStart={handleAIStart}
               onChatStart={handleChatStart}
               onPromptStart={handlePromptStart}
+              onRTIStart={handleRTIStart}
             />
           )}
 
@@ -169,6 +175,12 @@ function App() {
             />
           )}
           
+          {step === 'RTI_EXPERT' && (
+            <RTIExpert 
+              onCancel={handleBackToSelect}
+            />
+          )}
+
           {step === 'FORM' && selectedType && (
             <DraftForm 
               draftType={selectedType} 

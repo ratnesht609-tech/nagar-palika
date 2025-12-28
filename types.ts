@@ -67,3 +67,15 @@ export interface PhraseCategory {
   id: string;
   text: string;
 }
+
+// For RTI Expert
+export interface RTIAnalysisResult {
+  overall_summary: string;
+  analysis: {
+    question: string;
+    recommendation: 'DENY' | 'PROVIDE_LIMITED' | 'PROVIDE_FULL';
+    exemption_section: string;
+    reasoning: string;
+    suggested_response_text: string;
+  }[];
+}
